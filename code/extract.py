@@ -5,22 +5,27 @@ from urllib.request import urlretrieve
 import pandas as pd
 
 
-def setup_project_structure(project_root_dir: os.path = PROJECT_ROOT_DIR) -> None:
+def get_project_root_dir() -> os.path:
+    return os.path.dirname(os.path.dirname(os.path.abspath("__file__")))
+
+
+def setup_project_structure(project_root_dir: os.path = get_project_root_dir()) -> None:
     os.makedirs(os.path.join(project_root_dir, "data_raw"), exist_ok=True)
     os.makedirs(os.path.join(project_root_dir, "data_clean"), exist_ok=True)
     os.makedirs(os.path.join(project_root_dir, "code"), exist_ok=True)
 
 
 def extract_csv_from_url(
-    file_path: os.path, url: str, force_repull: bool = False
+    file_path: os.path, url: str, force_repull: bool = False, return_df: bool = True
 ) -> pd.DataFrame:
     if not os.path.isfile(file_path) or force_repull:
         urlretrieve(url, file_path)
-    return pd.read_csv(file_path)
+    if return_df:
+        return pd.read_csv(file_path)
 
 
 def extract_fcc_broadband_geography_lookup_table(
-    project_root_dir: os.path,
+    project_root_dir: os.path = get_project_root_dir(), return_df: bool = True
 ) -> pd.DataFrame:
     data_documentation_url = (
         "https://opendata.fcc.gov/Wireline/Geography-Lookup-Table/v5vt-e7vw"
@@ -29,10 +34,12 @@ def extract_fcc_broadband_geography_lookup_table(
     url = "https://opendata.fcc.gov/api/views/v5vt-e7vw/rows.csv?accessType=DOWNLOAD&sorting=true"
     file_path = os.path.join(project_root_dir, "data_raw", file_name)
 
-    return extract_csv_from_url(file_path=file_path, url=url)
+    return extract_csv_from_url(file_path=file_path, url=url, return_df=return_df)
 
 
-def extract_fcc_broadband_providers_12_2020(project_root_dir: os.path) -> pd.DataFrame:
+def extract_fcc_broadband_providers_12_2020(
+    project_root_dir: os.path = get_project_root_dir(), return_df: bool = True
+) -> pd.DataFrame:
     data_documentation_url = (
         "https://opendata.fcc.gov/Wireline/Provider-Table-December-2020/2ra3-4jd4"
     )
@@ -40,11 +47,11 @@ def extract_fcc_broadband_providers_12_2020(project_root_dir: os.path) -> pd.Dat
     url = "https://opendata.fcc.gov/api/views/2ra3-4jd4/rows.csv?accessType=DOWNLOAD&sorting=true"
     file_path = os.path.join(project_root_dir, "data_raw", file_name)
 
-    return extract_csv_from_url(file_path=file_path, url=url)
+    return extract_csv_from_url(file_path=file_path, url=url, return_df=return_df)
 
 
 def extract_fcc_broadband_area_coverage_12_2020(
-    project_root_dir: os.path,
+    project_root_dir: os.path = get_project_root_dir(), return_df: bool = True
 ) -> pd.DataFrame:
     data_documentation_url = (
         "https://opendata.fcc.gov/Wireline/Area-Table-December-2020/ymd4-xaiz"
@@ -53,10 +60,12 @@ def extract_fcc_broadband_area_coverage_12_2020(
     url = "https://opendata.fcc.gov/api/views/ymd4-xaiz/rows.csv?accessType=DOWNLOAD&sorting=true"
     file_path = os.path.join(project_root_dir, "data_raw", file_name)
 
-    return extract_csv_from_url(file_path=file_path, url=url)
+    return extract_csv_from_url(file_path=file_path, url=url, return_df=return_df)
 
 
-def extract_fcc_broadband_wi_fixed_12_2020(project_root_dir: os.path) -> pd.DataFrame:
+def extract_fcc_broadband_wi_fixed_12_2020(
+    project_root_dir: os.path = get_project_root_dir(), return_df: bool = True
+) -> pd.DataFrame:
     data_documentation_url = (
         "https://www.fcc.gov/general/explanation-broadband-deployment-data"
     )
@@ -84,10 +93,12 @@ def extract_fcc_broadband_wi_fixed_12_2020(project_root_dir: os.path) -> pd.Data
     )
     file_path = os.path.join(project_root_dir, "data_raw", file_name)
 
-    return extract_csv_from_url(file_path=file_path, url=url)
+    return extract_csv_from_url(file_path=file_path, url=url, return_df=return_df)
 
 
-def extract_fcc_broadband_mi_fixed_12_2020(project_root_dir: os.path) -> pd.DataFrame:
+def extract_fcc_broadband_mi_fixed_12_2020(
+    project_root_dir: os.path = get_project_root_dir(), return_df: bool = True
+) -> pd.DataFrame:
     data_documentation_url = (
         "https://www.fcc.gov/general/explanation-broadband-deployment-data"
     )
@@ -114,17 +125,27 @@ def extract_fcc_broadband_mi_fixed_12_2020(project_root_dir: os.path) -> pd.Data
     )
     file_path = os.path.join(project_root_dir, "data_raw", file_name)
 
-    return extract_csv_from_url(file_path=file_path, url=url)
+    return extract_csv_from_url(file_path=file_path, url=url, return_df=return_df)
 
 
 def main() -> None:
-    PROJECT_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath("__file__")))
+    PROJECT_ROOT_DIR = get_project_root_dir()
     setup_project_structure(project_root_dir=PROJECT_ROOT_DIR)
-    extract_fcc_broadband_geography_lookup_table(project_root_dir=PROJECT_ROOT_DIR)
-    extract_fcc_broadband_providers_12_2020(project_root_dir=PROJECT_ROOT_DIR)
-    extract_fcc_broadband_area_coverage_12_2020(project_root_dir=PROJECT_ROOT_DIR)
-    extract_fcc_broadband_wi_fixed_12_2020(project_root_dir=PROJECT_ROOT_DIR)
-    extract_fcc_broadband_mi_fixed_12_2020(project_root_dir=PROJECT_ROOT_DIR)
+    extract_fcc_broadband_geography_lookup_table(
+        project_root_dir=PROJECT_ROOT_DIR, return_df=False
+    )
+    extract_fcc_broadband_providers_12_2020(
+        project_root_dir=PROJECT_ROOT_DIR, return_df=False
+    )
+    extract_fcc_broadband_area_coverage_12_2020(
+        project_root_dir=PROJECT_ROOT_DIR, return_df=False
+    )
+    extract_fcc_broadband_wi_fixed_12_2020(
+        project_root_dir=PROJECT_ROOT_DIR, return_df=False
+    )
+    extract_fcc_broadband_mi_fixed_12_2020(
+        project_root_dir=PROJECT_ROOT_DIR, return_df=False
+    )
 
 
 if __name__ == "__main__":
